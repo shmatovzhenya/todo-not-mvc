@@ -38,6 +38,14 @@ const useTodoList = () => {
       await todoList.clearCompleted();
       await updateUI();
     },
+    async updateText(id: TodoId, text: string) {
+      await todoList.updateContent(id, text);
+      await updateUI();
+    },
+    async toggleStatusAll() {
+      await todoList.updateStatusAll();
+      await updateUI();
+    },
   };
 
   onMounted(async () => {

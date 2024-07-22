@@ -56,6 +56,14 @@ class TodoStorage<TodoContent> implements Storage<TodoContent> {
 
     localStorage.setItem("todos", JSON.stringify(todos));
   }
+
+  async updateStatusToAll(nextStatus: TodoStatus) {
+    const todos = this._loadAllFromStorage().map((todo) => {
+      return { ...todo, status: nextStatus };
+    });
+
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }
 }
 
 export { TodoStorage };

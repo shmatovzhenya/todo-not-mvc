@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
 import { TodoStatus } from "../../../core";
 import ToggleItem from "../../atoms/ToggleItem/index.vue";
 
@@ -9,9 +10,11 @@ type Props = {
 };
 const props = defineProps<Props>();
 
-const emits = defineEmits(["updateStatus", "remove"]);
+const emits = defineEmits(["updateStatus", "remove", "updateText"]);
 
 const isChecked = computed(() => props.status === "Completed");
+const isEditing = ref(false);
+const target = ref(null);
 
 const onUpdateStatus = () => {
   emits("updateStatus");
@@ -19,6 +22,20 @@ const onUpdateStatus = () => {
 
 const onRemoveClick = () => {
   emits("remove");
+};
+
+const tempText = ref<string>(props.text);
+const onSetEdit = () => {
+  isEditing.value = true;
+};
+
+onClickOutside(target, () => {
+  isEditing.value = false;
+});
+
+const onUpdateText = () => {
+  emits("updateText", tempText.value);
+  isEditing.value = false;
 };
 </script>
 <template>
@@ -29,14 +46,22 @@ const onRemoveClick = () => {
         [$style.crossed]: isChecked,
       },
     ]"
+    @dblclick="onSetEdit"
   >
+    <form v-if="isEditing" @submit.prevent="onUpdateText">
+      <input v-model="tempText" type="text" :class="$style.edit" ref="target" />
+    </form>
     <ToggleItem
       :checked="isChecked"
       :class="$style.checkbox"
       @change="onUpdateStatus"
     />
     <span :class="$style.text">{{ props.text }}</span>
-    <button :class="$style.remove" @click="onRemoveClick"></button>
+    <button
+      v-if="!isEditing"
+      :class="$style.remove"
+      @click="onRemoveClick"
+    ></button>
   </div>
 </template>
 <style lang="postcss" module>
@@ -88,5 +113,16 @@ const onRemoveClick = () => {
     content: "×";
     color: rgba(175, 47, 47, 0.35);
   }
+}
+.edit {
+  position: absolute;
+  box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+  left: 56px;
+  top: 0;
+  right: 0;
+  height: calc(100% - 4px);
+  border: 1px solid #999;
+  font-size: 24px;
+  color: #4d4d4d;
 }
 </style>

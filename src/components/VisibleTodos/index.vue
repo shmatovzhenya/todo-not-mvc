@@ -56,6 +56,10 @@ const onRemove = async (id: TodoId) => {
 const onClearCompleted = async () => {
   await actions.clearCompleted();
 };
+
+const onUpdateText = async (id: TodoId, nextText: string) => {
+  await actions.updateText(id, nextText);
+};
 </script>
 <template>
   <div>
@@ -66,6 +70,7 @@ const onClearCompleted = async () => {
           :status="item.status"
           @update-status="onUpdateStatus(item)"
           @remove="onRemove(item.id)"
+          @update-text="(text: string) => onUpdateText(item.id, text)"
         />
       </li>
     </ul>

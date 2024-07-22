@@ -23,6 +23,7 @@ interface Storage<TodoContent> {
     },
   ): Promise<void>;
   remove(id: TodoId | TodoId[]): Promise<void>;
+  updateStatusToAll(nextStatus: TodoStatus): Promise<void>;
 }
 
 class TodoList<Content> {
@@ -76,6 +77,20 @@ class TodoList<Content> {
     return todoList.filter((todo) => status === todo.status);
   }
 
+  async updateContent(id: TodoId, nextContent?: Content) {
+    if (!nextContent) {
+      await this.remove(id);
+      return;
+    }
+
+    this._collection[id] = {
+      content: nextContent,
+      status: this._collection[id].status,
+    };
+
+    await this._storage.update(id, { content: nextContent });
+  }
+
   async updateStatus(id: TodoId, nextStatus: TodoStatus) {
     this._collection[id] = {
       content: this._collection[id].content,
@@ -108,6 +123,25 @@ class TodoList<Content> {
     await this._storage.remove(ids);
   }
 
+  async updateStatusAll() {
+    const nextStatus = this._isAllTodoCompleted
+      ? todoStatusBuild("New")
+      : todoStatusBuild("Completed");
+
+    this._collection = this._order.reduce(
+      (result: Record<TodoId, Omit<Todo<Content>, "id">>, id) => {
+        result[id] = {
+          content: this._collection[id].content,
+          status: nextStatus,
+        };
+        return result;
+      },
+      {},
+    );
+
+    this._storage.updateStatusToAll(nextStatus);
+  }
+
   get countNewItems(): number {
     const result = Object.values(this._collection).reduce((result, todo) => {
       if (todo.status === "New") {
@@ -118,6 +152,12 @@ class TodoList<Content> {
     }, 0);
 
     return result;
+  }
+
+  private get _isAllTodoCompleted(): boolean {
+    return Object.values(this._collection).every(
+      (todo) => todo.status === "Completed",
+    );
   }
 }
 

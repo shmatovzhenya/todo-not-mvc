@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import ToggleAll from "../../ui/atoms/ToggleAll/index.vue";
 import { useTodoList } from "../../presenters/useTodoList";
 
@@ -11,6 +11,10 @@ const onSubmit = async () => {
   await actions.add(newTodoValue.value);
   newTodoValue.value = "";
 };
+
+watch(isChecked, async () => {
+  await actions.toggleStatusAll();
+});
 </script>
 <template>
   <header :class="$style.header">

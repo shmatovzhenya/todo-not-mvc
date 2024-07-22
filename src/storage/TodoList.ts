@@ -51,7 +51,7 @@ class TodoStorage<TodoContent> implements Storage<TodoContent> {
         return id.includes(todo.id);
       }
 
-      return todo.id !== id;
+      return todo.id === id;
     });
 
     localStorage.setItem("todos", JSON.stringify(todos));

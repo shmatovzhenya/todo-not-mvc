@@ -48,10 +48,10 @@ class TodoStorage<TodoContent> implements Storage<TodoContent> {
   async remove(id: TodoId | TodoId[]) {
     const todos = this._loadAllFromStorage().filter((todo) => {
       if (Array.isArray(id)) {
-        return id.includes(todo.id);
+        return !id.includes(todo.id);
       }
 
-      return todo.id === id;
+      return todo.id !== id;
     });
 
     localStorage.setItem("todos", JSON.stringify(todos));
